@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.oauth.model.SystemClientInfo;
 import com.cloud.user.model.constants.CredentialType;
+import com.cloud.util.HttpUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -39,10 +43,12 @@ public class TokenController {
      * @param username
      * @param password
      * @return
+     * @throws Exception 
      */
     @PostMapping("/sys/login")
-    public Map<String, Object> login(String username, String password) {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> login(String username, String password) throws Exception {
+    	System.out.println("==========");
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put(OAuth2Utils.GRANT_TYPE, "password");
         parameters.put(OAuth2Utils.CLIENT_ID, SystemClientInfo.CLIENT_ID);
         parameters.put("client_secret", SystemClientInfo.CLIENT_SECRET);
@@ -52,7 +58,17 @@ public class TokenController {
         parameters.put("username", username + "|" + CredentialType.USERNAME.name());
         parameters.put("password", password);
 
-       Map<String, Object> tokenInfo =  null;//oauth2Client.postAccessToken(parameters);
+        
+      // Map<String, Object> tokenInfo =  oauth2Client.postAccessToken(parameters);
+        
+        String httpPost = HttpUtil.httpPost("http://localhost:8080/oauth/token",parameters);
+        JSONObject obj = JSON.parseObject(httpPost);
+        ObjectMapper mapper = new ObjectMapper();    
+        Map<String,Object> m = mapper.readValue(httpPost, Map.class);  
+        
+        System.out.println("httpPost:"+httpPost);
+        Map<String, Object> tokenInfo =  m;
+        		
        
        
         saveLoginLog(username, "用户名密码登陆");
@@ -67,10 +83,11 @@ public class TokenController {
      * @param key
      * @param code
      * @return
+     * @throws Exception 
      */
     @PostMapping("/sys/login-sms")
-    public Map<String, Object> smsLogin(String phone, String key, String code) {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> smsLogin(String phone, String key, String code) throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put(OAuth2Utils.GRANT_TYPE, "password");
         parameters.put(OAuth2Utils.CLIENT_ID, SystemClientInfo.CLIENT_ID);
         parameters.put("client_secret", SystemClientInfo.CLIENT_SECRET);
@@ -81,7 +98,15 @@ public class TokenController {
         // 短信登录无需密码，但security底层有密码校验，我们这里将手机号作为密码，认证中心采用同样规则即可
         parameters.put("password", phone);
 
-        Map<String, Object> tokenInfo = null;//oauth2Client.postAccessToken(parameters);
+        
+        
+        String httpPost = HttpUtil.httpPost("http://localhost:8080/oauth/token",parameters);
+        JSONObject obj = JSON.parseObject(httpPost);
+        ObjectMapper mapper = new ObjectMapper();    
+        Map<String,Object> m = mapper.readValue(httpPost, Map.class);  
+        
+        
+        Map<String, Object> tokenInfo = m;//oauth2Client.postAccessToken(parameters);
         saveLoginLog(phone, "手机号短信登陆");
 
         return tokenInfo;
@@ -91,10 +116,11 @@ public class TokenController {
      * 微信登录
      *
      * @return
+     * @throws Exception 
      */
     @PostMapping("/sys/login-wechat")
-    public Map<String, Object> smsLogin(String openid, String tempCode) {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> smsLogin(String openid, String tempCode) throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put(OAuth2Utils.GRANT_TYPE, "password");
         parameters.put(OAuth2Utils.CLIENT_ID, SystemClientInfo.CLIENT_ID);
         parameters.put("client_secret", SystemClientInfo.CLIENT_SECRET);
@@ -104,6 +130,13 @@ public class TokenController {
         // 微信登录无需密码，但security底层有密码校验，我们这里将手机号作为密码，认证中心采用同样规则即可
         parameters.put("password", tempCode);
 
+        
+        
+        String httpPost = HttpUtil.httpPost("http://localhost:8080/oauth/token",parameters);
+        JSONObject obj = JSON.parseObject(httpPost);
+        ObjectMapper mapper = new ObjectMapper();    
+        Map<String,Object> m = mapper.readValue(httpPost, Map.class);  
+        
         Map<String, Object> tokenInfo = null;//oauth2Client.postAccessToken(parameters);
         saveLoginLog(openid, "微信登陆");
 

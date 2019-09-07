@@ -2,7 +2,7 @@
 // 正式生产为了保证网关的高可用性，肯定是部署了多个网关服务，然后用nginx反向代理的
 // 那么多个网关服务或者生产环境的话，我们这里配置的是nginx的地址
 // var domainName = "http://api.gateway.com:8080";
-var domainName = "http://localhost:8090";
+var domainName = "http://localhost:8080";
 
 
 

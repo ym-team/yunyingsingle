@@ -36,6 +36,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 		
 		
 		
+		http.headers().frameOptions().sameOrigin();
+		
+		
 		
 	}
 	
